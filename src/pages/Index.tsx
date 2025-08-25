@@ -1,14 +1,55 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { AssessmentIntro } from '@/components/assessment/AssessmentIntro';
+import { AssessmentSection } from '@/components/assessment/AssessmentSection';
+import { AssessmentResults } from '@/components/assessment/AssessmentResults';
+import { useAssessment } from '@/hooks/useAssessment';
 
 const Index = () => {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
-    </div>
-  );
+  const {
+    state,
+    startAssessment,
+    recordAnswer,
+    nextQuestion,
+    previousQuestion,
+    completeSection,
+    restartAssessment,
+    getCurrentQuestions,
+    canGoNext,
+    canGoPrevious,
+    isLastQuestion
+  } = useAssessment();
+
+  if (state.currentSection === 'intro') {
+    return <AssessmentIntro onStartAssessment={startAssessment} />;
+  }
+
+  if (state.currentSection === 'results' && state.results) {
+    return <AssessmentResults results={state.results} onRestart={restartAssessment} />;
+  }
+
+  if (state.currentSection === 'psychometric' || state.currentSection === 'technical') {
+    const questions = getCurrentQuestions();
+    const sectionTitle = state.currentSection === 'psychometric' 
+      ? 'Psychometric Evaluation' 
+      : 'Technical Aptitude Assessment';
+
+    return (
+      <AssessmentSection
+        title={sectionTitle}
+        questions={questions}
+        currentQuestionIndex={state.currentQuestionIndex}
+        answers={state.answers}
+        onAnswer={recordAnswer}
+        onNext={nextQuestion}
+        onPrevious={previousQuestion}
+        onComplete={completeSection}
+        canGoNext={canGoNext}
+        canGoPrevious={canGoPrevious}
+        isLastQuestion={isLastQuestion}
+      />
+    );
+  }
+
+  return <AssessmentIntro onStartAssessment={startAssessment} />;
 };
 
 export default Index;
